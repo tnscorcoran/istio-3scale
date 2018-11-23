@@ -29,6 +29,8 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 	chmod +x step-1-setup-apps.sh
 	chmod +x step-2-setup-vars-routes.sh
 	chmod +x step-3-output-urls-creds.sh
+	chmod +x step-4-output-3scale-urls.sh
+	chmod +x step-5-inject-istio-to-apicast.sh
 	
 	
 	chmod +x step-1-setup-apps.sh
@@ -51,7 +53,7 @@ In a browser, login to Openshift and 3scale using the URLs and credentials outpu
 	sh step-3-output-urls-creds.sh
 
 
-2 - Test out current Non-Istio API Gateway
+2 - Test out current Non-Istio API Gateway (Apicast
 ==================================================================================================
 
 
@@ -69,7 +71,7 @@ Add it as an environment variable, substituting your key for mine:
 
 Execute this script and note the 3 URLs it outputs 
 
-	step-4-output-3scale-urls.sh
+	sh step-4-output-3scale-urls.sh
 
 Follow the steps including inserting these 3 URLs in *2.2.4. Service Integration* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
 
@@ -83,11 +85,16 @@ Ensure your user key is till available and test out your managed API
 	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"` 
 
 
-2 - Test out current Non-Istio API Gateway
+3 - Apply Istio to Apicast
 ==================================================================================================
 
 
-	
+
+Test out your Istio Enabled API Gateway
+
+	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -n $GW_PROJECT -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
+
+	 	
 		
 
 
