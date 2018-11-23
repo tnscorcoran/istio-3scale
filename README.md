@@ -31,21 +31,21 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 	chmod +x step-3-output-urls-creds.sh
 	chmod +x step-4-output-3scale-urls.sh
 	chmod +x step-5-inject-istio-to-apicast.sh
+	chmod +x step-6-configure-istio-ingress-gateway.sh
 	
-	
-	chmod +x step-1-setup-apps.sh
-	chmod +x step-1-setup-apps.sh
-	chmod +x step-1-setup-apps.sh
-	chmod +x step-1-setup-apps.sh
-	chmod +x 2-setup-vars.sh
 
 
-Setup your environment variables
+
+
+
+
+
+
+
+
+Setup your environment variables and apply these changes to your current terminal
 
 	sh step-2-setup-vars-routes.sh
-
-Apply these changes to your current terminal 
-
 	source ~/.bashrc
 
 In a browser, login to Openshift and 3scale using the URLs and credentials output on executing this command. Also in a browser, test the naked catalog route.
@@ -87,15 +87,30 @@ Ensure your user key is till available and test out your managed API
 
 3 - Apply Istio to Apicast
 ==================================================================================================
+Apply Istio to Apicast using this script
+	
+	sh step-5-inject-istio-to-apicast.sh
 
-
-
-Test out your Istio Enabled API Gateway
+Wait until developer-prod-apicast-istio is ready with 2 containers running (2/2)
+	oc get pods
+	
+Test out your Istio Enabled API Gateway. Run this curl a few times in quick succession
 
 	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -n $GW_PROJECT -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
 
 	 	
-		
+4 - Configure Istio Ingress Gateway
+==================================================================================================
+
+Apply the configuration and source it so variables are available in your current terminal
+
+	sh step-6-configure-istio-ingress-gateway.sh
+	source ~/.bashrc
+
+Test it out
+	curl -v \
+       -HHost:$CATALOG_API_GW_HOST \
+       http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
 
 
 
