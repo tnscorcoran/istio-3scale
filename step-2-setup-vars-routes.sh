@@ -29,5 +29,8 @@ oc project $MSA_PROJECT
 echo "export NAKED_CATALOG_ROUTE=$(oc get route catalog-unsecured -o template --template='{{.spec.host}}' -n $MSA_PROJECT)" >> ~/.bashrc
 source ~/.bashrc
 
+oc project $GW_PROJECT
 oc create route edge catalog-stage-apicast-$OCP_USERNAME --service=stage-apicast  -n $GW_PROJECT
 oc create route edge catalog-prod-apicast-$OCP_USERNAME --service=prod-apicast  -n $GW_PROJECT
+
+oc rollout resume deploy stage-apicast prod-apicast -n $GW_PROJECT

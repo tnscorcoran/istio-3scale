@@ -27,7 +27,7 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 ***TODO ADD MORE*** 
 
 	chmod +x step-1-setup-apps.sh
-	chmod +x step-2-setup-vars.sh
+	chmod +x step-2-setup-vars-routes.sh
 	chmod +x step-3-output-urls-creds.sh
 	
 	
@@ -40,23 +40,55 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 
 Setup your environment variables
 
-	sh step-2-setup-vars.sh
+	sh step-2-setup-vars-routes.sh
 
 Apply these changes to your current terminal 
 
 	source ~/.bashrc
+
 In a browser, login to Openshift and 3scale using the URLs and credentials output on executing this command. Also in a browser, test the naked catalog route.
 
 	sh step-3-output-urls-creds.sh
 
-Now you're ready to make some manual configurations on the 3scale web interface. Follow steps between *2.2.1. Define Catalog Service* and *2.2.3. Create Application* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
+
+2 - Test out current Non-Istio API Gateway
+==================================================================================================
 
 
+Now you're ready to make some manual configurations on the 3scale web interface. Follow steps between *2.2.1. Define Catalog Service* and *2.2.3. Create Application* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html). In those steps you
+ - Create a 3scale Service
+ - Create an Application Plan
+ - Create an Application
+
+Copy your new User Key, in my case 1d5587f40ab92dea4434083a676b02ab.
+
+Add it as an environment variable, substituting your key for mine:
+
+	echo "export CATALOG_USER_KEY=1d5587f40ab92dea4434083a676b02ab" >> ~/.bashrc
+	source ~/.bashrc
+
+Execute this script and note the 3 URLs it outputs 
+
+	step-4-output-3scale-urls.sh
+
+Follow the steps including inserting these 3 URLs in *2.2.4. Service Integration* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
+
+Delete pods as using the next command. Wait for them to come back up. This will sync your Service Integration changes to the APICast gateway.
+	
+	for i in `oc get pod -n $GW_PROJECT | grep "apicast" | awk '{print $1}'`; do oc delete pod $i; done
+	
+Ensure your user key is till available and test out your managed API
+
+	echo $CATALOG_USER_KEY
+	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"` 
 
 
+2 - Test out current Non-Istio API Gateway
+==================================================================================================
 
 
-
+	
+		
 
 
 
