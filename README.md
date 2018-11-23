@@ -46,8 +46,9 @@ Apply these changes to your current terminal
 
 	source ~/.bashrc
 
+Output the important URLs and credeentials you'll need to login into the components in a browser
 
-
+	sh step-3-output-urls-creds.sh
 
 
 
