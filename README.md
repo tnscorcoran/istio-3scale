@@ -1,22 +1,63 @@
 # Red Hat 3scale and Istio demo
 
 ## Prerequisites
-TODO
+The steps below assume you have Openshift installed. If not, follow these instructions:
+[Installing Openshift](https://docs.openshift.com/container-platform/3.11/install/running_install.html)
 
-1 - Login and execute initialisations
+
+
+1 - Login to your RHEL box and execute initialisations
 ==================================================================================================
 
-In this demo, we assume you are using RHPDS
-Order the 3scale Istio demo on that system. You will be issued with a GUID identifying your cluster
+In this demo, we assume you are using RHPDS. Should you prefer to install the components yourself, follow the steps in ./step-1-setup-apps.sh
+
+If following the RHPDS route, order the 3scale Istio demo on that system. You will be issued with a GUID identifying your cluster
 SSH into the cluster box as follows 
 
-ssh -i ~/.ssh/your_private_key_name {$username}@bastion.{$GUID}.openshift.opentlc.com
+	ssh -i ~/.ssh/your_private_key_name {$username}@bastion.{$GUID}.openshift.opentlc.com
+
+	git clone https://github.com/tnscorcoran/istio-3scale.git
+
+	cd istio-3scale
+
+Change the permissions on the bash scripts that will be used to setup the demos.
 
 
 
-git clone https://github.com/tnscorcoran/istio-3scale.git
+***TODO ADD MORE*** 
 
-mkdir lab
+	chmod +x step-1-setup-apps.sh
+	chmod +x step-2-setup-vars.sh
+	chmod +x step-3-output-urls-creds.sh
+	
+	
+	chmod +x step-1-setup-apps.sh
+	chmod +x step-1-setup-apps.sh
+	chmod +x step-1-setup-apps.sh
+	chmod +x step-1-setup-apps.sh
+	chmod +x 2-setup-vars.sh
 
-cd istio-3scale
+
+Setup your environment variables
+
+	sh step-2-setup-vars.sh
+
+Apply these changes to your current terminal 
+
+	source ~/.bashrc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

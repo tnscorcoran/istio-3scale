@@ -31,15 +31,3 @@ source ~/.bashrc
 
 oc create route edge catalog-stage-apicast-$OCP_USERNAME --service=stage-apicast  -n $GW_PROJECT
 oc create route edge catalog-prod-apicast-$OCP_USERNAME --service=prod-apicast  -n $GW_PROJECT
-
-curl -X GET "http://$NAKED_CATALOG_ROUTE/products"
-
-echo -en "Openshift URL, ID and Password:"
-echo -en "\n\nhttps://$OCP_DOMAIN:8443\n\n"
-echo $OCP_USERNAME
-echo $OCP_PASSWD
-echo -en "3scale Admin URL:"
-echo -en "\n\nhttps://$TENANT_NAME-admin.$API_WILDCARD_DOMAIN\n\n"   
-echo "http://$NAKED_CATALOG_ROUTE"
-
-   
