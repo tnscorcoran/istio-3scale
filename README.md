@@ -2,7 +2,6 @@
 
 ## Prerequisites
 TODO
-Note: We have inserted whitespace in some URLs as they contain placeholders and are not valid URLs as they appear. Insert the values resolving to the URL fragments and remove whitespace.  
 
 1 - Login and execute initialisations
 ==================================================================================================
