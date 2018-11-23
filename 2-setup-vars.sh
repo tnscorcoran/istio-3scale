@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Modify this to be your usename
 echo "export API_USERNAME=user1" >> ~/.bashrc
 
