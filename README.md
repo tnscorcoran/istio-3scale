@@ -45,12 +45,11 @@ Setup your environment variables
 Apply these changes to your current terminal 
 
 	source ~/.bashrc
-
-Output the important URLs and credeentials you'll need to login into the components in a browser
+In a browser, login to Openshift and 3scale using the URLs and credentials output on executing this command. Also in a browser, test the naked catalog route.
 
 	sh step-3-output-urls-creds.sh
 
-
+Now you're ready to make some manual configurations on the 3scale web interface. Follow steps between *2.2.1. Define Catalog Service* and *2.2.3. Create Application* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
 
 
 
