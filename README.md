@@ -122,7 +122,7 @@ Apply the configuration and source it so variables are available in your current
 Wait for *developer-prod-apicast-istio* to start and finish re-deploying - either by watching it on screen or *oc get pods -w*
 When that's done, verify the existence of the libraries *ngx_http_opentracing_module.so* and *libjaegertracing.so* on executing these commands
 
-	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l 
+	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /usr/local/openresty/nginx/modules/ngx_http_opentracing_module.so 
 	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /opt/app-root/lib/libjaegertracing.so.0
 	
 
