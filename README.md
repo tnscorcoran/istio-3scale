@@ -32,7 +32,7 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 	chmod +x step-4-output-3scale-urls.sh
 	chmod +x step-5-inject-istio-to-apicast.sh
 	chmod +x step-6-configure-istio-ingress-gateway.sh
-	
+	chmod +x step-7-tracing-on-gateway.sh
 
 
 
@@ -111,6 +111,20 @@ Test it out
 	
 	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
 
+	 	
+5 - Apicast Gateway - Istio enabled
+==================================================================================================
+
+Apply the configuration and source it so variables are available in your current terminal
+
+	sh step-7-tracing-on-gateway.sh
+
+Wait for *developer-prod-apicast-istio* to start and finish re-deploying - either by watching it on screen or *oc get pods -w*
+When that's done, verify the existence of the libraries *ngx_http_opentracing_module.so* and *libjaegertracing.so* on executing these commands
+
+	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l 
+	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /opt/app-root/lib/libjaegertracing.so.0
+	
 
 
 
