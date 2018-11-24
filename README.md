@@ -108,9 +108,8 @@ Apply the configuration and source it so variables are available in your current
 	source ~/.bashrc
 
 Test it out
-	curl -v \
-       -HHost:$CATALOG_API_GW_HOST \
-       http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
+	
+	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
 
 
 
