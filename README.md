@@ -9,6 +9,8 @@ The steps below assume you have Openshift installed. If not, follow these instru
 1 - Login to your RHEL box and execute initialisations
 ==================================================================================================
 
+This document describes a fast way to implement excellent the Istio 3scale tutorials avai;able at [Opentlc](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/). We recommend you follow the entire labs - and just use this as a fast way to recreate the demos at a later stage.
+
 In this demo, we assume you are using RHPDS. Should you prefer to install the components yourself, follow the steps in ./step-1-setup-apps.sh
 
 If following the RHPDS route, order the 3scale Istio demo on that system. You will be issued with a GUID identifying your cluster
@@ -124,7 +126,22 @@ When that's done, verify the existence of the libraries *ngx_http_opentracing_mo
 
 	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /usr/local/openresty/nginx/modules/ngx_http_opentracing_module.so 
 	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /opt/app-root/lib/libjaegertracing.so.0
+
+	 	
+6 - Catalog Service - Istio enabled
+==================================================================================================
+
+We need to add tracing capabilities to our API backend in order to gain full visibility into the latencies in any given request.	
+Apply the configuration:
+
+	sh step-8-tracing-on-api-backend.sh
 	
+Ensure these ENV vars are set on your system:
 
+	echo $CATALOG_USER_KEY
+	echo $CATALOG_API_GW_HOST	
 
+Generate some load by running this several times
 
+	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
+	
