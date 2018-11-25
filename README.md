@@ -54,14 +54,23 @@ Execute this script and note the 3 URLs it outputs
 
 Follow the steps including inserting these 3 URLs in *2.2.4. Service Integration* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
 
-Delete pods as using the next command. Wait for them to come back up. This will sync your Service Integration changes to the APICast gateway.
-	
-	for i in `oc get pod -n $GW_PROJECT | grep "apicast" | awk '{print $1}'`; do oc delete pod $i; done
-	
-Ensure your user key is till available and test out your managed API
+Delete pods as using the next command. This will sync your Service Integration changes to the APICast gateway. 
+Wait for them to come back up. You'll know they're up when both *stage-apicast-xxxx* and *prod-apicast-xxxx* both show 1/1 containers running.
 
+	
+	oc project $GW_PROJECT 
+	for i in `oc get pod -n $GW_PROJECT | grep "apicast" | awk '{print $1}'`; do oc delete pod $i; done
+	oc get pods -w
+	
+Cancel from watching your pods, ensure your user key is still available and test out your managed API
+
+	CTRL+C
 	echo $CATALOG_USER_KEY
 	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"` 
+
+Now you have 3scale fully functioning in its conventional manner - without Istio. On your 3scale web interface, navigate to Analytics -> catalog_service.
+Every call you make to the API via the curl is reported and shows up on this Analytics screen.
+Now it's time to start applying Istio configuration.
 
 
 ## 3 - Apply Istio to Apicast
@@ -71,10 +80,12 @@ Apply Istio to Apicast using this script
 	sh step-05-inject-istio-to-apicast.sh
 
 Wait until developer-prod-apicast-istio is ready with 2 containers running (2/2)
-	oc get pods
-	
-Test out your Istio Enabled API Gateway. Run this curl a few times in quick succession
 
+	oc get pods -w
+	
+Cancel from watching your pods, , test out your Istio Enabled API Gateway. Run this curl a few times in quick succession
+
+	CTRL+C
 	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -n $GW_PROJECT -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
 
 	 	
