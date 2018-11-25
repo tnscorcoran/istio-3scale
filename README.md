@@ -151,6 +151,7 @@ Generate some load by running this several times
 7 - 3scale Mixer Adapter
 ==================================================================================================
 
+####  7.1 Istio Ingress Gateway without 3scale
 By delegating access policies to the 3scale API Manager, it enables rate limits and acccess policies to be configured in a non-yaml based way as Istio currently requires.
 
 By using the 3scale Mixer Adapter, we can decommission our APIcast gateway and use Istio Ingress gateway to make the authorise and report calls to the 3scale API Manager. 
@@ -161,7 +162,13 @@ Apply the configuration
 
 	sh step-9-configure-ingress-no-3scale.sh
 	
-On the Openshift GUI, wait till all Istio pods are available then test out the API with a POST
+Wait until Istio Pilot, which was purged, is back
+
+	oc get pods -n istio-system | grep istio-adapter
+
+Wait till all Istio pods are available then test out the API with a POST
+
+
 
 	curl -v -X POST -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})""`/product/ -d '{
 	  "itemId" : "822222",
@@ -169,11 +176,18 @@ On the Openshift GUI, wait till all Istio pods are available then test out the A
 	  "desc" : "Oculus Rift 2",
 	  "price" : 102.0
 	}'
+	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/product/822222"`
+	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products"`
+
+####  7.2 Applying 3scale Mixer to Istio Ingress Gateway 
+
+Now we insert the 3scale Istio Mixer. Run this script
+
+	sh step-10-add-3scale-mixer-to-ingress.sh
+
+Wait till this completes before proceeding -  i.e. has 2/2 containers
 	
-
-
-
-
+	oc get pods -n istio-system | grep 3scale-istio-adapter
 
 
 

@@ -48,8 +48,8 @@ spec:
  
 oc create -f ~/lab/catalog-direct-gw-vs.yml -n $MSA_PROJECT --as=system:admin 
 
-oc delete pod \
-     `oc get pod -n istio-system | grep "istio-policy" | awk '{print $1}'` \
+oc project istio-system
+oc delete pod `oc get pod -n istio-system | grep "istio-policy" | awk '{print $1}'` \
      -n istio-system \
      --as=system:admin
 
