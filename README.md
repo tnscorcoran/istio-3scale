@@ -35,7 +35,8 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 	chmod +x step-5-inject-istio-to-apicast.sh
 	chmod +x step-6-configure-istio-ingress-gateway.sh
 	chmod +x step-7-tracing-on-gateway.sh
-
+	chmod +x step-8-tracing-on-api-backend.sh
+	chmod +x step-9-configure-ingress-no-3scale.sh
 
 
 
@@ -135,7 +136,7 @@ We need to add tracing capabilities to our API backend in order to gain full vis
 Apply the configuration:
 
 	sh step-8-tracing-on-api-backend.sh
-	
+
 Ensure these ENV vars are set on your system:
 
 	echo $CATALOG_USER_KEY
@@ -144,4 +145,36 @@ Ensure these ENV vars are set on your system:
 Generate some load by running this several times
 
 	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
+
+
+	 	
+7 - 3scale Mixer Adapter
+==================================================================================================
+
+By delegating access policies to the 3scale API Manager, it enables rate limits and acccess policies to be configured in a non-yaml based way as Istio currently requires.
+
+By using the 3scale Mixer Adapter, we can decommission our APIcast gateway and use Istio Ingress gateway to make the authorise and report calls to the 3scale API Manager. 
+
+We will first hook our Istio Ingress Gateway to our Catalog Service without 3scale in the picture.
+
+Apply the configuration
+
+	sh step-9-configure-ingress-no-3scale.sh
+	
+On the Openshift GUI, wait till all Istio pods are available then test out the API with a POST
+
+	curl -v -X POST -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})""`/product/ -d '{
+	  "itemId" : "822222",
+	  "name" : "Oculus Rift 2",
+	  "desc" : "Oculus Rift 2",
+	  "price" : 102.0
+	}'
+	
+
+
+
+
+
+
+
 	
