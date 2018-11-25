@@ -48,12 +48,12 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 
 Setup your environment variables and apply these changes to your current terminal
 
-	sh step-2-setup-vars-routes.sh
+	sh step-02-setup-vars-routes.sh
 	source ~/.bashrc
 
 In a browser, login to Openshift and 3scale using the URLs and credentials output on executing this command. Also in a browser, test the naked catalog route.
 
-	sh step-3-output-urls-creds.sh
+	sh step-03-output-urls-creds.sh
 
 
 2 - Test out current Non-Istio API Gateway (Apicast
@@ -74,7 +74,7 @@ Add it as an environment variable, substituting your key for mine:
 
 Execute this script and note the 3 URLs it outputs 
 
-	sh step-4-output-3scale-urls.sh
+	sh step-04-output-3scale-urls.sh
 
 Follow the steps including inserting these 3 URLs in *2.2.4. Service Integration* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
 
@@ -92,7 +92,7 @@ Ensure your user key is till available and test out your managed API
 ==================================================================================================
 Apply Istio to Apicast using this script
 	
-	sh step-5-inject-istio-to-apicast.sh
+	sh step-05-inject-istio-to-apicast.sh
 
 Wait until developer-prod-apicast-istio is ready with 2 containers running (2/2)
 	oc get pods
@@ -107,7 +107,7 @@ Test out your Istio Enabled API Gateway. Run this curl a few times in quick succ
 
 Apply the configuration and source it so variables are available in your current terminal
 
-	sh step-6-configure-istio-ingress-gateway.sh
+	sh step-06-configure-istio-ingress-gateway.sh
 	source ~/.bashrc
 
 Test it out
@@ -120,7 +120,7 @@ Test it out
 
 Apply the configuration and source it so variables are available in your current terminal
 
-	sh step-7-tracing-on-gateway.sh
+	sh step-07-tracing-on-gateway.sh
 
 Wait for *developer-prod-apicast-istio* to start and finish re-deploying - either by watching it on screen or *oc get pods -w*
 When that's done, verify the existence of the libraries *ngx_http_opentracing_module.so* and *libjaegertracing.so* on executing these commands
@@ -176,7 +176,7 @@ We will first hook our Istio Ingress Gateway to our Catalog Service without 3sca
 
 Apply the configuration
 
-	sh step-9-configure-ingress-no-3scale.sh
+	sh step-09-configure-ingress-no-3scale.sh
 	
 Wait until Istio Pilot, which was purged, is back
 
