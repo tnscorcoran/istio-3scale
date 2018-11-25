@@ -9,41 +9,17 @@ The steps below assume you have Openshift installed. If not, follow these instru
 1 - Login to your RHEL box and execute initialisations
 ==================================================================================================
 
-This document describes a fast way to implement excellent the Istio 3scale tutorials avai;able at [Opentlc](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/). We recommend you follow the entire labs - and just use this as a fast way to recreate the demos at a later stage.
+This document describes a fast way to implement excellent the Istio 3scale tutorials available at [Opentlc](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/). We recommend you follow the entire labs - and just use this as a fast way to recreate the demos at a later stage.
 
 In this demo, we assume you are using RHPDS. Should you prefer to install the components yourself, follow the steps in ./step-1-setup-apps.sh
 
-If following the RHPDS route, order the 3scale Istio demo on that system. You will be issued with a GUID identifying your cluster
-SSH into the cluster box as follows 
+If following the RHPDS route, order the 3scale Istio demo on that system. After several minutes, you'll get an email with a GUID identifying your cluster. 
+SSH into the cluster box as follows, clone this repo and change into its directory:
 
-	ssh -i ~/.ssh/your_private_key_name {$username}@bastion.{$GUID}.openshift.opentlc.com
-
+	ssh -i ~/.ssh/your_private_key_name {$rhpds-username}@bastion.{$GUID}.openshift.opentlc.com
 	git clone https://github.com/tnscorcoran/istio-3scale.git
 
 	cd istio-3scale
-
-Change the permissions on the bash scripts that will be used to setup the demos.
-
-
-
-***TODO ADD MORE*** 
-
-	chmod +x step-1-setup-apps.sh
-	chmod +x step-2-setup-vars-routes.sh
-	chmod +x step-3-output-urls-creds.sh
-	chmod +x step-4-output-3scale-urls.sh
-	chmod +x step-5-inject-istio-to-apicast.sh
-	chmod +x step-6-configure-istio-ingress-gateway.sh
-	chmod +x step-7-tracing-on-gateway.sh
-	chmod +x step-8-tracing-on-api-backend.sh
-	chmod +x step-9-configure-ingress-no-3scale.sh
-	chmod +x step-10-add-3scale-mixer-to-ingress-1.sh
-	chmod +x step-11-add-3scale-mixer-to-ingress-2.sh
-
-
-
-
-
 
 
 Setup your environment variables and apply these changes to your current terminal
