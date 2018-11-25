@@ -128,14 +128,30 @@ When that's done, verify the existence of the libraries *ngx_http_opentracing_mo
 	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /usr/local/openresty/nginx/modules/ngx_http_opentracing_module.so 
 	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /opt/app-root/lib/libjaegertracing.so.0
 
+	 
 	 	
-6 - Catalog Service - Istio enabled
+6 - Jaeger UI
+==================================================================================================
+
+
+Generate some traffic - calling this a number of times
+	
+	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY
+
+Identify the URL for your Jaeger Distributed Tracing 
+	
+	echo -en "\n\nhttp://"$(oc get route/tracing -o template --template {{.spec.host}} -n istio-system)"\n\n"
+	
+Navigate to the above URL, choose developer-prod-apicast, drill in, choose a span and click on it. You can see the constituent parts making up the entire latency of the request.
+
+	 	
+7 - Catalog Service - Istio enabled
 ==================================================================================================
 
 We need to add tracing capabilities to our API backend in order to gain full visibility into the latencies in any given request.	
 Apply the configuration:
 
-	sh step-8-tracing-on-api-backend.sh
+	sh step-08-tracing-on-api-backend.sh
 
 Ensure these ENV vars are set on your system:
 
@@ -200,13 +216,19 @@ Inject 3scale handler into Istio Mixer Adapter:
 	
 	step-11-add-3scale-mixer-to-ingress-2.sh
 	
+Verify your handler exists
+	
+	oc get handler -n istio-system --as=system:admin -o yaml
 
 
+Verify your handler is behaving properly and authenticating. This first call should fail and the second, with a user key should pass.
+	
+
+	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products"`
+	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
 
 
-
-
-
+Congratulations, you've successfully integrated 3scale API Management into your Istio Service Mesh!
 
 
 
