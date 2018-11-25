@@ -37,8 +37,8 @@ Change the permissions on the bash scripts that will be used to setup the demos.
 	chmod +x step-7-tracing-on-gateway.sh
 	chmod +x step-8-tracing-on-api-backend.sh
 	chmod +x step-9-configure-ingress-no-3scale.sh
-
-
+	chmod +x step-10-add-3scale-mixer-to-ingress-1.sh
+	chmod +x step-11-add-3scale-mixer-to-ingress-2.sh
 
 
 
@@ -188,6 +188,27 @@ Now we insert the 3scale Istio Mixer. Run this script
 Wait till this completes before proceeding -  i.e. has 2/2 containers
 	
 	oc get pods -n istio-system | grep 3scale-istio-adapter
+
+
+On your 3scale Web interface, Go to choose the APIs menu. Make a note of your catalog_service API's ID, likely 4 wiich we'll refer to as *<your catalog service Id>*.
+
+Execute the following:
+
+	export CATALOG_SERVICE_ID=<your catalog service Id>
+
+Inject 3scale handler into Istio Mixer Adapter:
+	
+	step-11-add-3scale-mixer-to-ingress-2.sh
+	
+
+
+
+
+
+
+
+
+
 
 
 

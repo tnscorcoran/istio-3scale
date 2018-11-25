@@ -14,6 +14,7 @@ oc set env dc/3scale-istio-adapter --containers="3scale-istio-adapter" -e "THREE
 oc set env dc/3scale-istio-adapter --containers="3scale-istio-httpclient" -e "APICAST_LOG_LEVEL=debug" -n istio-system --as=system:admin
 
 
+cd $HOME/istio-3scale
 
 
 
