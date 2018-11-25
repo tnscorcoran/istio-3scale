@@ -7,7 +7,7 @@ The steps below assume you have Openshift installed. If not, follow these instru
 
 
 ## 1 - Login to your RHEL box and execute initialisations
-==================================================================================================
+==============================================================
 
 This document describes a fast way to implement excellent the Istio 3scale tutorials available at [Opentlc](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/). We recommend you follow the entire labs - and just use this as a fast way to recreate the demos at a later stage.
 
@@ -33,7 +33,7 @@ In a browser, login to Openshift and 3scale using the URLs and credentials outpu
 
 
 ## 2 - Test out current Non-Istio API Gateway (Apicast
-==================================================================================================
+==========================================================
 
 
 Now you're ready to make some manual configurations on the 3scale web interface. Follow steps between *2.2.1. Define Catalog Service* and *2.2.3. Create Application* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html). In those steps you
@@ -65,7 +65,7 @@ Ensure your user key is till available and test out your managed API
 
 
 ## 3 - Apply Istio to Apicast
-==================================================================================================
+================================
 Apply Istio to Apicast using this script
 	
 	sh step-05-inject-istio-to-apicast.sh
@@ -79,7 +79,7 @@ Test out your Istio Enabled API Gateway. Run this curl a few times in quick succ
 
 	 	
 ## 4 - Configure Istio Ingress Gateway
-==================================================================================================
+=========================================
 
 Apply the configuration and source it so variables are available in your current terminal
 
@@ -92,7 +92,7 @@ Test it out
 
 	 	
 ## 5 - Apicast Gateway - Istio enabled
-==================================================================================================
+=========================================
 
 Apply the configuration and source it so variables are available in your current terminal
 
@@ -107,7 +107,7 @@ When that's done, verify the existence of the libraries *ngx_http_opentracing_mo
 	 
 	 	
 ## 6 - Jaeger UI
-==================================================================================================
+=================
 
 
 Generate some traffic - calling this a number of times
@@ -122,7 +122,7 @@ Navigate to the above URL, choose developer-prod-apicast, drill in, choose a spa
 
 	 	
 ## 7 - Catalog Service - Istio enabled
-==================================================================================================
+=========================================
 
 We need to add tracing capabilities to our API backend in order to gain full visibility into the latencies in any given request.	
 Apply the configuration:
@@ -141,7 +141,7 @@ Generate some load by running this several times
 
 	 	
 ## 8 - 3scale Mixer Adapter
-==================================================================================================
+=============================
 
 ####  8.1 Istio Ingress Gateway without 3scale
 By delegating access policies to the 3scale API Manager, it enables rate limits and acccess policies to be configured in a non-yaml based way as Istio currently requires.
