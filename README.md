@@ -79,11 +79,11 @@ Apply Istio to Apicast using this script
 	
 	sh step-05-inject-istio-to-apicast.sh
 
-Wait until developer-prod-apicast-istio is ready with 2 containers running (2/2)
+Wait until *developer-prod-apicast-istio-xxxxx* is ready with 2 containers running (2/2)
 
 	oc get pods -w
 	
-Cancel from watching your pods, , test out your Istio Enabled API Gateway. Run this curl a few times in quick succession
+Cancel from watching your pods, test out your Istio Enabled API Gateway. Run this curl a few times in quick succession
 
 	CTRL+C
 	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -n $GW_PROJECT -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
