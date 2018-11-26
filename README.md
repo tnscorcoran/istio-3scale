@@ -11,7 +11,7 @@ The steps below assume you have Openshift installed. If not, follow these instru
 
 This document describes a fast way to implement excellent the Istio 3scale tutorials available at [Opentlc](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/). We recommend you follow the entire labs - and just use this as a fast way to recreate the demos at a later stage.
 
-In this demo, we assume you are using RHPDS. Should you prefer to install the components yourself, follow the steps in ./step-1-setup-apps.sh
+For these demos, we assume you are using RHPDS. Should you prefer to install the components yourself, follow the steps in ./step-1-setup-apps.sh
 
 If following the RHPDS route, order the 3scale Istio demo on that system. After several minutes, you'll get an email with a GUID identifying your cluster. 
 SSH into the cluster box as follows, clone this repo and change into its directory:
@@ -41,11 +41,11 @@ Now you're ready to make some manual configurations on the 3scale web interface.
  - Create an Application Plan
  - Create an Application
 
-Copy your new User Key, in my case 1d5587f40ab92dea4434083a676b02ab.
+Copy your new User Key, in my case 9ae7ef94e736123543e74dd53ee67cd0.
 
 Add it as an environment variable, substituting your key for mine:
 
-	echo "export CATALOG_USER_KEY=1d5587f40ab92dea4434083a676b02ab" >> ~/.bashrc
+	echo "export CATALOG_USER_KEY=9ae7ef94e736123543e74dd53ee67cd0" >> ~/.bashrc
 	source ~/.bashrc
 
 Execute this script and note the 3 URLs it outputs 
@@ -88,76 +88,20 @@ Cancel from watching your pods, test out your Istio Enabled API Gateway. Run thi
 	CTRL+C
 	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -n $GW_PROJECT -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
 
-	 	
-## 4 - Configure Istio Ingress Gateway
-=========================================
 
-Apply the configuration and source it so variables are available in your current terminal
+Delete Apicast project - to preserve resources
 
-	sh step-06-configure-istio-ingress-gateway.sh
-	source ~/.bashrc
-
-Test it out
-	
-	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
-
-	 	
-## 5 - Apicast Gateway - Istio enabled
-=========================================
-
-Apply the configuration and source it so variables are available in your current terminal
-
-	sh step-07-tracing-on-gateway.sh
-
-Wait for *developer-prod-apicast-istio* to start and finish re-deploying - either by watching it on screen or *oc get pods -w*
-When that's done, verify the existence of the libraries *ngx_http_opentracing_module.so* and *libjaegertracing.so* on executing these commands
-
-	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /usr/local/openresty/nginx/modules/ngx_http_opentracing_module.so 
-	oc rsh `oc get pod | grep "apicast-istio" | awk '{print $1}'` ls -l /opt/app-root/lib/libjaegertracing.so.0
-
-	 
-	 	
-## 6 - Jaeger UI
-=================
-
-
-Generate some traffic - calling this a number of times
-	
-	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY
-
-Identify the URL for your Jaeger Distributed Tracing 
-	
-	echo -en "\n\nhttp://"$(oc get route/tracing -o template --template {{.spec.host}} -n istio-system)"\n\n"
-	
-Navigate to the above URL, choose developer-prod-apicast, drill in, choose a span and click on it. You can see the constituent parts making up the entire latency of the request.
-
-	 	
-## 7 - Catalog Service - Istio enabled
-=========================================
-
-We need to add tracing capabilities to our API backend in order to gain full visibility into the latencies in any given request.	
-Apply the configuration:
-
-	sh step-08-tracing-on-api-backend.sh
-
-Ensure these ENV vars are set on your system:
-
-	echo $CATALOG_USER_KEY
-	echo $CATALOG_API_GW_HOST	
-
-Generate some load by running this several times
-
-	curl -v -HHost:$CATALOG_API_GW_HOST http://$INGRESS_HOST:$INGRESS_PORT/products?user_key=$CATALOG_USER_KEY		
+	oc delete project $GW_PROJECT --as=system:admin  
 
 
 	 	
-## 8 - 3scale Mixer Adapter
+## 4 - 3scale Mixer Adapter
 =============================
 
-####  8.1 Istio Ingress Gateway without 3scale
+####  4.1 Istio Ingress Gateway without 3scale
 By delegating access policies to the 3scale API Manager, it enables rate limits and acccess policies to be configured in a non-yaml based way as Istio currently requires.
 
-By using the 3scale Mixer Adapter, we can decommission our APIcast gateway and use Istio Ingress gateway to make the authorise and report calls to the 3scale API Manager. 
+By using the 3scale Mixer Adapter, we have been able to decommission our APIcast gateway and use Istio Ingress gateway to make the authorise and report calls to the 3scale API Manager. 
 
 We will first hook our Istio Ingress Gateway to our Catalog Service without 3scale in the picture.
 
@@ -165,14 +109,13 @@ Apply the configuration
 
 	sh step-09-configure-ingress-no-3scale.sh
 	
-Wait until Istio Pilot, which was purged, is back
+Wait until Istio Policy, which was purged, is back
 
-	oc get pods -n istio-system | grep istio-adapter
+	oc get pods -n istio-system | grep istio-policy -w
 
 Wait till all Istio pods are available then test out the API with a POST
 
-
-
+	CTRL+C
 	curl -v -X POST -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})""`/product/ -d '{
 	  "itemId" : "822222",
 	  "name" : "Oculus Rift 2",
@@ -182,18 +125,18 @@ Wait till all Istio pods are available then test out the API with a POST
 	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/product/822222"`
 	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products"`
 
-####  8.2 Applying 3scale Mixer to Istio Ingress Gateway 
+####  4.2 Applying 3scale Mixer to Istio Ingress Gateway 
 
 Now we insert the 3scale Istio Mixer. Run this script
 
-	sh step-10-add-3scale-mixer-to-ingress.sh
+	sh step-10-add-3scale-mixer-to-ingress-1.sh
 
 Wait till this completes before proceeding -  i.e. has 2/2 containers
 	
 	oc get pods -n istio-system | grep 3scale-istio-adapter
 
 
-On your 3scale Web interface, Go to choose the APIs menu. Make a note of your catalog_service API's ID, likely 4 wiich we'll refer to as *<your catalog service Id>*.
+On your 3scale Web interface, Go to choose the APIs menu. Make a note of your catalog_service API's ID, likely 4 which we'll refer to as *<your catalog service Id>*.
 
 Execute the following:
 
@@ -215,7 +158,14 @@ Verify your handler is behaving properly and authenticating. This first call sho
 	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
 
 
-Congratulations, you've successfully integrated 3scale API Management into your Istio Service Mesh!
+Besides the 3scale Traffic Analytics shown above, Istio gives you extra visualisation tools - we're going to look at 2 - Jaeger and Grafana.
+
+	step-x-output-visualisation-tool-urls.sh
+
+Visit Jaeger - ingress gateway. See the spans
+
+
+Congratulations, you've successfully integrated 3scale API Management into your Istio Service Mesh and used Istio's superb visualization tools!
 
 
 
