@@ -45,7 +45,7 @@ Copy your new User Key, in my case 9ae7ef94e736123543e74dd53ee67cd0.
 
 Add it as an environment variable, substituting your key for mine:
 
-	echo "export CATALOG_USER_KEY=9ae7ef94e736123543e74dd53ee67cd0" >> ~/.bashrc
+	echo "export CATALOG_USER_KEY=c8f13334f9c9b1c3f58153e69a69c62a" >> ~/.bashrc
 	source ~/.bashrc
 
 Execute this script and note the 3 URLs it outputs 
@@ -144,7 +144,7 @@ Execute the following:
 
 Inject 3scale handler into Istio Mixer Adapter:
 	
-	step-11-add-3scale-mixer-to-ingress-2.sh
+	sh step-11-add-3scale-mixer-to-ingress-2.sh
 	
 Verify your handler exists
 	
@@ -160,7 +160,7 @@ Verify your handler is behaving properly and authenticating. This first call sho
 
 Besides the 3scale Traffic Analytics shown above, Istio gives you extra visualisation tools - we're going to look at 2 - Jaeger and Grafana.
 
-	step-x-output-visualisation-tool-urls.sh
+	sh step-x-output-visualisation-tool-urls.sh
 
 Visit Jaeger - ingress gateway. See the spans
 
