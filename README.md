@@ -111,7 +111,7 @@ There are various tunables here on screen - regarding the various components of 
     enabled: true
 ```
 Note the level of indentation - it's a sibling of _istio_ as shown:
-![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/1-ServiceMeshControlPlane-yaml.png)
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/1-smControlPlane-yaml.png)
 
 More [optional values for this yaml here](https://docs.openshift.com/container-platform/4.4/service_mesh/service_mesh_install/customizing-installation-ossm.html#ossm-cr-threescale_customizing-installation-ossm)
 
