@@ -207,7 +207,7 @@ But in my case, using the default Product called _API_, I go to:
 ```
 Product: API -> Applications -> Listing ->  drill into Developer's App_
 ```
-and copy your API credential ( _user key_ ) also known as _API Key_. 
+and copy your API credential ( _User Key_ ) also known as _API Key_. 
 
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/2-get-api-key.png)
 
