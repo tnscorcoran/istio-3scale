@@ -1,174 +1,94 @@
-# Red Hat 3scale and Istio demo
+# 3scale Istio Mixer Adapter
 
-## Prerequisites
-The steps below assume you have Openshift installed. If not, follow these instructions:
-[Installing Openshift](https://docs.openshift.com/container-platform/3.11/install/running_install.html)
+## In this demo we 
+- setup 3scale on OpenShift
+- setup a simple application using several Microservices, the [Bookinfo example] (https://istio.io/latest/docs/examples/bookinfo/) taken from the upstream Istio site.
+- apply service mesh control to Bookinfo
+- apply 3scale API Management to Bookinfo through the [3scale Istio Adapter](https://docs.openshift.com/container-platform/4.4/service_mesh/threescale_adapter/threescale-adapter.html)
 
+Let's get started.
 
+----------------------------------------------------------------------------------------------------
 
-## 1 - Login to your RHEL box and execute initialisations
-==============================================================
+## Setup 3scale on OpenShift
 
-This document describes a fast way to implement excellent the Istio 3scale tutorials available at [Opentlc](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/). We recommend you follow the entire labs - and just use this as a fast way to recreate the demos at a later stage.
+First let's install 3scale 2.9 on OpenShift. There are various options around 
+- operator or template
+- storage
 
-For these demos, we assume you are using RHPDS. Should you prefer to install the components yourself, follow the steps in ./step-1-setup-apps.sh
+For simplicity, I'll be using the 3scale operator and S3 for storage. I will provide requisite instructions to do this on this README, but for more details see [deploying-threescale-using-the-operator](https://access.redhat.com/documentation/en-us/red_hat_3scale_api_management/2.9/html/installing_3scale/install-threescale-on-openshift-guide#deploying-threescale-using-the-operator) 
+### Pre-requisites
+- in my case, an S3 implemenation. I'll use Amazon S3.
+- in my case, I'll use the Red Hat productised 3scale, for which you'll need an account at [https://access.redhat.com](https://access.redhat.com/) to pull the supported, productised images. You can alternatively use the Community operator for which no Red Hat credentials are required.
+- an OpenShift 4 cluster - in my case 4.5 with Administrative access.
+- the _oc_ client installed locally (e.g. on your laptop) logged in as an Administrator to OpenShift.
+- this repo cloned - and _cd_ into it.
 
-If following the RHPDS route, order the 3scale Istio demo on that system. After several minutes, you'll get an email with a GUID identifying your cluster. 
-SSH into the cluster box as follows, clone this repo and change into its directory:
+Setup this environment variable to be the home of this repo on your laptop.
+```
+export REPO_HOME=`pwd`
+```
 
-	ssh -i ~/.ssh/your_private_key_name {$rhpds-username}@bastion.{$GUID}.openshift.opentlc.com
-	git clone https://github.com/tnscorcoran/istio-3scale.git
+### 3scale setup instructions
+Execute the following
+```
+oc new-project 3scale
+```
+Modify $REPO_HOME/3scale-setup/secret-s3.yaml with your actuals under _stringData_ and execute:
+```
+oc apply -f $REPO_HOME/3scale-setup/secret-s3.yaml
+```
+For more on S3 for 3scale storage see [S3 3scale storage](https://access.redhat.com/documentation/en-us/red_hat_3scale_api_management/2.9/html/installing_3scale/install-threescale-on-openshift-guide#amazon_simple_storage_service_3scale_emphasis_filestorage_emphasis_installation)
 
-	cd istio-3scale
 
+Create a secret using your [https://access.redhat.com](https://access.redhat.com/) credentials
+```
+oc create secret docker-registry threescale-registry-auth \
+--docker-server=registry.redhat.io \
+--docker-username="yourusername" \
+--docker-password="yourpassword"
+```
 
-Setup your environment variables and apply these changes to your current terminal
+On the OpenShift web console, select the 3scale project. Navigate to _Operators->Operator Hub_. Search for _3scale_ and select the _Red Hat Integration - 3scale_ operator
 
-	sh step-02-setup-vars-routes.sh
-	source ~/.bashrc
+![](https://github.com/tnscorcoran/3scale-soap-2-rest/blob/master/_images/2-3scale-operator.png)
 
-In a browser, login to Openshift and 3scale using the URLs and credentials output on executing this command. Also in a browser, test the naked catalog route it outputs:
+Install this operator, going with the defaults on the next screen.
+![](https://github.com/tnscorcoran/3scale-soap-2-rest/blob/master/_images/3-install-3scale-operator.png)
 
-	sh step-03-output-urls-creds.sh
+Your display will change to _Installed Operators_. A couple of minutes later the staus should be _Succeeded_.
 
+Select the _Red Hat Integration - 3scale_ operator.
+![](https://github.com/tnscorcoran/3scale-soap-2-rest/blob/master/_images/4-installed-3scale-operator.png)
 
-## 2 - Test out current Non-Istio API Gateway (Apicast
-==========================================================
+Click _Create Instance_ on the _API Manager_ box. You need to overwrite the yaml that's on the screen. Overwrite with your modified __REPO_HOME/3scale-setup/threescale.yaml__ . You'll just need to modify what's highlighted - which you can get in the address on your brower tab that's logged into OpenShift:
+![](https://github.com/tnscorcoran/3scale-soap-2-rest/blob/master/_images/5-threescale.yaml.png)
 
+Copy it in, overwriting what's there and Click _Create_. Then navigate to _Workloads->Pods_. A few minutes later all pods should be Running and 1/1 or 3/3 under Ready.
 
-Now you're ready to make some manual configurations on the 3scale web interface. Follow steps between *2.2.1. Define Catalog Service* and *2.2.3. Create Application* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html). In those steps you
- - Create a 3scale Service
- - Create an Application Plan
- - Create an Application
+Now you need to retrieve your credentials for 3scale. Go to _Workloads->Secrets_. Open the _system-seed_ secret, click _Reveal Values_ on the right and see your ADMIN_PASSWORD. Your ADMIN_USER will also be needed but it will be _admin_. Keep note of both.
+![](https://github.com/tnscorcoran/3scale-soap-2-rest/blob/master/_images/6-reveal-system-seed-secret.png)
 
-Copy your new User Key, in my case 9ae7ef94e736123543e74dd53ee67cd0.
+Now time to open the 3scale Admin console. Go to _Networking->Routes_ and open the _zync-3scale-provider-xxxxxxx_ Route. 
+![](https://github.com/tnscorcoran/3scale-soap-2-rest/blob/master/_images/7-3scale-admin-route.png)
 
-Add it as an environment variable, substituting your key for mine:
+Use your ADMIN_USER and ADMIN_PASSWORD credentials from the previous step and log in.
 
-	echo "export CATALOG_USER_KEY=c8f13334f9c9b1c3f58153e69a69c62a" >> ~/.bashrc
-	source ~/.bashrc
+----------------------------------------------------------------------------------------------------
 
-Execute this script and note the 3 URLs it outputs 
+## Setup [Bookinfo sample application](https://istio.io/latest/docs/examples/bookinfo/) on OpenShift
 
-	sh step-04-output-3scale-urls.sh
+First we setup the OpenShift Service Mesh through the Service Mesh Operator.
 
-Follow the steps including inserting these 3 URLs in *2.2.4. Service Integration* on the [longer instructions](http://www.opentlc.com/rhte/rhte_lab_04_api_mgmt_and_service_mesh/LabInstructionsFiles/01_2_api_mgmt_service_mesh_Lab.html)
 
-Delete pods as using the next command. This will sync your Service Integration changes to the APICast gateway. 
-Wait for them to come back up. You'll know they're up when both *stage-apicast-xxxx* and *prod-apicast-xxxx* both show 1/1 containers running.
 
-	
-	oc project $GW_PROJECT 
-	for i in `oc get pod -n $GW_PROJECT | grep "apicast" | awk '{print $1}'`; do oc delete pod $i; done
-	oc get pods -w
-	
-Cancel from watching your pods, ensure your user key is still available and test out your managed API
 
-	CTRL+C
-	echo $CATALOG_USER_KEY
-	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"` 
 
-Now you have 3scale fully functioning in its conventional manner - without Istio. On your 3scale web interface, navigate to Analytics -> catalog_service.
-Every call you make to the API via the curl is reported and shows up on this Analytics screen.
-Now it's time to start applying Istio configuration.
-
-
-## 3 - Apply Istio to Apicast
-================================
-Apply Istio to Apicast using this script
-	
-	sh step-05-inject-istio-to-apicast.sh
-
-Wait until *developer-prod-apicast-istio-xxxxx* is ready with 2 containers running (2/2)
-
-	oc get pods -w
-	
-Cancel from watching your pods, test out your Istio Enabled API Gateway. Run this curl a few times in quick succession
-
-	CTRL+C
-	curl -v -k `echo "https://"$(oc get route/catalog-prod-apicast-$OCP_USERNAME -n $GW_PROJECT -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
-
-
-Delete Apicast project - to preserve resources
-
-	oc delete project $GW_PROJECT --as=system:admin  
-
-
-	 	
-## 4 - 3scale Mixer Adapter
-=============================
-
-####  4.1 Istio Ingress Gateway without 3scale
-By delegating access policies to the 3scale API Manager, it enables rate limits and acccess policies to be configured in a non-yaml based way as Istio currently requires.
-
-By using the 3scale Mixer Adapter, we have been able to decommission our APIcast gateway and use Istio Ingress gateway to make the authorise and report calls to the 3scale API Manager. 
-
-We will first hook our Istio Ingress Gateway to our Catalog Service without 3scale in the picture.
-
-Apply the configuration
-
-	sh step-09-configure-ingress-no-3scale.sh
-	
-Wait until Istio Policy, which was purged, is back
-
-	oc get pods -n istio-system | grep istio-policy -w
-
-Wait till all Istio pods are available then test out the API with a POST
-
-	CTRL+C
-	curl -v -X POST -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})""`/product/ -d '{
-	  "itemId" : "822222",
-	  "name" : "Oculus Rift 2",
-	  "desc" : "Oculus Rift 2",
-	  "price" : 102.0
-	}'
-	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/product/822222"`
-	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products"`
-
-####  4.2 Applying 3scale Mixer to Istio Ingress Gateway 
-
-Now we insert the 3scale Istio Mixer. Run this script
-
-	sh step-10-add-3scale-mixer-to-ingress-1.sh
-
-Wait till this completes before proceeding -  i.e. has 2/2 containers
-	
-	oc get pods -n istio-system | grep 3scale-istio-adapter
-
-
-On your 3scale Web interface, Go to choose the APIs menu. Make a note of your catalog_service API's ID, likely 4 which we'll refer to as *<your catalog service Id>*.
-
-Execute the following:
-
-	export CATALOG_SERVICE_ID=<your catalog service Id>
-
-Inject 3scale handler into Istio Mixer Adapter:
-	
-	sh step-11-add-3scale-mixer-to-ingress-2.sh
-	
-Verify your handler exists
-	
-	oc get handler -n istio-system --as=system:admin -o yaml
-
-
-Verify your handler is behaving properly and authenticating. This first call should fail and the second, with a user key should pass.
-	
-
-	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products"`
-	curl -v `echo "http://"$(oc get route istio-ingressgateway -n istio-system -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
-
-
-Besides the 3scale Traffic Analytics shown above, Istio gives you extra visualisation tools - we're going to look at 2 - Jaeger and Grafana.
-
-	sh step-x-output-visualisation-tool-urls.sh
-
-Visit Jaeger - ingress gateway. See the spans
-
-
-Congratulations, you've successfully integrated 3scale API Management into your Istio Service Mesh and used Istio's superb visualization tools!
-
-
-
-
-
-	
+## Conclusion
+In this demo we 
+- setup 3scale on OpenShift
+- setup a simple application using several Microservices, the [Bookinfo example] (https://istio.io/latest/docs/examples/bookinfo/) taken from the upstream Istio site.
+- apply service mesh control to Bookinfo
+- apply 3scale API Management to Bookinfo through the [3scale Istio Adapter](https://docs.openshift.com/container-platform/4.4/service_mesh/threescale_adapter/threescale-adapter.html)
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
