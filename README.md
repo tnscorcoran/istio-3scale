@@ -20,7 +20,7 @@ For simplicity, I'll be using the 3scale operator and S3 for storage. I will pro
 ### Pre-requisites
 - in my case, an S3 implemenation. I'll use Amazon S3.
 - in my case, I'll use the Red Hat productised 3scale, for which you'll need an account at [https://access.redhat.com](https://access.redhat.com/) to pull the supported, productised images. You can alternatively use the Community operator for which no Red Hat credentials are required.
-- an OpenShift 4 cluster - in my case 4.5 with Administrative access.
+- an OpenShift 4 cluster - in my case 4.4 with Administrative access.
 - the _oc_ client installed locally (e.g. on your laptop) logged in as an Administrator to OpenShift.
 - this repo cloned - and _cd_ into it.
 
@@ -79,6 +79,119 @@ Use your ADMIN_USER and ADMIN_PASSWORD credentials from the previous step and lo
 ## Setup [Bookinfo sample application](https://istio.io/latest/docs/examples/bookinfo/) on OpenShift
 
 First we setup the OpenShift Service Mesh through the Service Mesh Operator.
+
+Log into your OpenShift cluster as administrator - both on the terminal using *oc* and web interfaces.
+We use Kubernetes operators to install the service mesh. Provisioning of Operators requires admin access.
+Consumption of operators - typically by developers does not. But for speed we'll use 
+the same admin user for both provisioning and use.
+
+We need to install 4 Operators - from the OpenShift Operator Hub. Navigate to the OpenShift Operator Hub:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/1-open-shift-operatorhub.png)
+
+We'll install 4 operators. The first 3 support the main one, the *Red Hat OpenShift Service Mesh Operator* 
+- Elasticsearch
+- Jaeger - for distributed tracing
+- Kiali - for Service Mesh topology visualisation
+- Red Hat OpenShift Service Mesh Operator
+
+Find each one in the Operator Hub. Click into each and select Install. Choose Cluster scope and Automatic approval for each of the 4 operators - as shown here for Elasticsearch:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/1-operator-subscription.png)
+
+After a few minutes the operators will be installed. They'll appear as follows:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/2-installed-operators.png)
+
+Next you create a Service Mesh from the Service Mesh operator. Create a project (namespace) called *istio-system*
+to hold the Service Mesh application. With *istio-system* selected, click into the Red Hat OpenSHift Service Mesh Operator. Then create a new *Istio Service Mesh Control Plane* in my namespace *istio-system* as shown:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/3-install-control-plane.png)
+
+There are varios tunables here on screen - regarding the various components of Service Mesh. Stick with the defaults.
+
+After a short time later, the Service Mesh application and its components are installed. You can verify it on screen 
+or in the command line as shown:
+```
+oc project istio-system
+oc get pods -w
+```
+
+As soon as all are ready and running, you can continue. 
+
+Now we're ready to apply Service Mesh control to a microservices Application. We'll use the Sample BookInfo application - available from the upstream Istio website.
+
+Here's a diagram of the application:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/4-istio-book-info-architecture.png)
+
+It's a very basic application - a webpage called productpage. 
+On the left hand side of the screen will be displayed the result of the details page.
+Of most interest to us are the 3 reviews microservices - the results of which will appear on the right hand side of the webpage.
+- when v1 of reviews is called - ratings is not called and NO stars are shown
+- when v2 of reviews is called - ratings are called and BLACK stars are shown
+- when v3 of reviews is called - ratings are called and RED stars are shown
+
+At this point, we need to do 3 things:
+
+1. The first step is to create namespace for the bookinfo application - call it *bookinfo*. I can do this either on the GUI or the command line - let's do it on the command line:
+```
+oc new-project bookinfo
+```
+
+2. The next step is to create a *Service Mesh Member Roll* on the same screen you created a new *Istio Service Mesh Control Plane* about - this essentially dictates which namespaces we'll apply Service Mesh control to. Just enter *bookinfo*.
+
+3. Finally I install my bookinfo microservices application - which my Service Mesh Member Roll
+is looking out to apply control to. I'll do that by applying some yaml that installs the Bookinfo Microservices application. As soon as this is created, the Service Mesh Member Roll will apply Service Mesh control to it. Execute the following:
+```
+oc project bookinfo
+oc apply -f https://raw.githubusercontent.com/istio/istio/release-1.3/samples/bookinfo/platform/kube/bookinfo.yaml
+```
+
+Wait till it completes.
+
+A couple of minutes later, our Bookinfo Microservices application is installed with Service Mesh control
+as we can see:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/4-istio-book-info-pods.png)
+
+Next we need to setup some Service Mesh constructs, inherited from Upstream Istio, for Service Mesh control. First the Envoy based side car proxies and the microservices to apply them to:
+```
+oc apply -n bookinfo -f https://raw.githubusercontent.com/Maistra/bookinfo/maistra-1.0/bookinfo.yaml
+```
+
+Next an Istio gateway - representing the port and protocol at the ingress point to the mesh(in our case HTTP and port 80):
+```
+oc apply -n bookinfo -f https://raw.githubusercontent.com/Maistra/bookinfo/maistra-1.0/bookinfo-gateway.yaml
+```
+
+Next the Istio Destination rules, that is addressible services and their versions:
+```
+oc apply -n bookinfo -f https://raw.githubusercontent.com/istio/istio/release-1.1/samples/bookinfo/networking/destination-rule-all.yaml
+```
+
+Now, output the Gateway URL: 
+```
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+echo $GATEWAY_URL
+```
+Append the path */productpage* to this gateway URL to view our Product Page under Service Mesh control. Hit it in a browser:
+![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/4-product-page.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
