@@ -205,7 +205,7 @@ Login to 3scale and retrieve your application credentials. In my case I'm using 
 
 But in my case, using the default Product called _API_, I go to: 
 ```
-Product: API -> Applications -> Listing ->  drill into _Developer's App_ 
+Product: API -> Applications -> Listing ->  drill into Developer's App_
 ```
 and copy your API credential ( _user key_ ) also known as _API Key_. 
 
