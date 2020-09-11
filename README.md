@@ -2,6 +2,7 @@
 
 ## In this demo we 
 - setup 3scale on OpenShift
+- setup 3scale enabled Red Hat Service Mesh on OpenShift
 - setup a simple application using several Microservices, the [Bookinfo example] (https://istio.io/latest/docs/examples/bookinfo/) taken from the upstream Istio site.
 - apply service mesh control to Bookinfo
 - apply 3scale API Management to Bookinfo through the [3scale Istio Adapter](https://docs.openshift.com/container-platform/4.4/service_mesh/threescale_adapter/threescale-adapter.html)
@@ -196,11 +197,13 @@ Append the path */productpage* to this gateway URL to view our Product Page unde
 
 For more on applying Red Hat Service Mesh based control and visibility, see my repo on [Openshift Servicemesh](https://github.com/tnscorcoran/openshift-servicemesh)
 
+## Apply 3scale API Management to Bookinfo
 
+### Configure 3scale
 
+Login to 3scale and retrieve your application credentials. In my case I'm using the application that's created in the default product called _API_. If you're not using the default product, you'll need to create an Application Plan then an Application. For more on that, see [Creating Application Plans](https://access.redhat.com/documentation/en-us/red_hat_3scale_api_management/2.8/html-single/getting_started/index#creating-application-plans) and then the following section on creating Applications.
 
-
-
+So in my case, using the default Product called _API_, As shown, go to: Product: API -> Applications -> Listing ->  drill into _Developer's App_ and copy your API credential ( _user key_ ) also known as _API Key_. 
 
 
 
