@@ -104,7 +104,17 @@ Next you create a Service Mesh from the Service Mesh operator. Create a project 
 to hold the Service Mesh application. With *istio-system* selected, click into the Red Hat OpenSHift Service Mesh Operator. Then create a new *Istio Service Mesh Control Plane* in my namespace *istio-system* as shown:
 ![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/3-install-control-plane.png)
 
-There are varios tunables here on screen - regarding the various components of Service Mesh. Stick with the defaults.
+There are various tunables here on screen - regarding the various components of Service Mesh. Stick with the defaults apart from the following 
+- make this entry to enable the 3scale adapter: 
+```
+  threeScale:
+    enabled: true
+```
+Note the level of indentation - it's a sibling of _istio_ as shown:
+
+More [optional values for this yaml here](https://docs.openshift.com/container-platform/4.4/service_mesh/service_mesh_install/customizing-installation-ossm.html#ossm-cr-threescale_customizing-installation-ossm)
+
+
 
 After a short time later, the Service Mesh application and its components are installed. You can verify it on screen 
 or in the command line as shown:
