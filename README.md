@@ -194,7 +194,7 @@ Append the path */productpage* to this gateway URL to view our Product Page unde
 ![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/4-product-page.png)
 
 
-For more on apply Red Hat Service Mesh based control and visibility, see my repo on [Openshift Servicemesh](https://github.com/tnscorcoran/openshift-servicemesh)
+For more on applying Red Hat Service Mesh based control and visibility, see my repo on [Openshift Servicemesh](https://github.com/tnscorcoran/openshift-servicemesh)
 
 
 
