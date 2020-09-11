@@ -125,6 +125,17 @@ oc get pods -w
 ```
 Note 3scale-istio-adapter-xxxxxxx is one of the pods. As soon as all are ready and running, you can continue. 
 
+One things you'll need to do for 3scale integration is to _enable policy checks_, which are disabled by default. 3scale is a policy delegated out to from the Istio Mixer. Run
+```
+oc get cm -n istio-system istio -o jsonpath='{.data.mesh}' | grep disablePolicyChecks
+```
+If _disablePolicyChecks_ is _true_, you need to set it to _false_. Run the following, search for _disablePolicyChecks_ (about 10 lines down) and change it to _false_
+```
+oc edit cm -n istio-system istio
+```
+For more see [Updating Mixer policy enforcement](https://docs.openshift.com/container-platform/4.4/service_mesh/service_mesh_day_two/prepare-to-deploy-applications-ossm.html#ossm-mixer-policy_deploying-applications-ossm)
+
+
 Now we're ready to apply Service Mesh control to a microservices Application. We'll use the [Bookinfo example] (https://istio.io/latest/docs/examples/bookinfo/) taken from the upstream Istio site.
 
 Here's a diagram of the application:
@@ -183,6 +194,7 @@ Append the path */productpage* to this gateway URL to view our Product Page unde
 ![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/4-product-page.png)
 
 
+For more on apply Red Hat Service Mesh based control and visibility, see my repo on [Openshift Servicemesh](https://github.com/tnscorcoran/openshift-servicemesh)
 
 
 
