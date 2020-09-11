@@ -212,8 +212,37 @@ and copy your API credential ( _User Key_ ) also known as _API Key_.
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/2-get-api-key.png)
 
 
+Now we change our API product enforcement type to _Istio_. Go to 
+```
+Product: API -> Applications -> Listing ->  drill into Developer's App_
+```
 
 
+
+oc project istio-system
+export API_ADMIN_ACCESS_TOKEN=229cccd645b00e459db30993893374cc85c7b6eb7f082c5582202a81ebe8654b
+export SM_CP_NS=istio-system
+export SYSTEM_PROVIDER_URL=https://3scale-admin.apps.cluster-65cd.sandbox135.opentlc.com
+export HANDLER_NAME=threescale
+
+oc exec -n ${SM_CP_NS} $(oc get po -n ${SM_CP_NS} -o jsonpath='{.items[?(@.metadata.labels.app=="3scale-istio-adapter")].metadata.name}') -it -- ./3scale-config-gen --url ${SYSTEM_PROVIDER_URL} --name ${HANDLER_NAME} --token ${API_ADMIN_ACCESS_TOKEN} -n ${SM_CP_NS} > threescale-adapter-config.yaml
+
+
+oc apply -f /Users/tomcorcoran/work/learning/int/005-satya-3scale-mixer/3-mbo-3scale-istio/threescale-adapter-config.yaml  -n istio-system
+
+
+oc project bookinfo
+export CREDENTIALS_NAME="threescale"
+export SERVICE_ID="2"
+export DEPLOYMENT="productpage-v1"
+patch="$(oc get deployment "${DEPLOYMENT}" --template='{"spec":{"template":{"metadata":{"labels":{ {{ range $k,$v := .spec.template.metadata.labels }}"{{ $k }}":"{{ $v }}",{{ end }}"service-mesh.3scale.net/service-id":"'"${SERVICE_ID}"'","service-mesh.3scale.net/credentials":"'"${CREDENTIALS_NAME}"'"}}}}}' )"
+oc patch deployment "${DEPLOYMENT}" --patch ''"${patch}"''
+
+
+
+
+More options
+https://github.com/3scale/3scale-istio-adapter#generating-and-creating-configuration
 
 
 
