@@ -216,7 +216,7 @@ and copy your API credential ( _User Key_ ) also known as _API Key_.
 
 Now we change our API product deployment type to _Istio_. Go to 
 ```
-Product: API -> Integration -> Settings ->  change Deployment to Istio -> click _Update Product_ at the bottom of page
+Product: API -> Integration -> Settings ->  change Deployment to Istio -> click Update Product at the bottom of page
 ```
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/3-settings-istio.png)
 Now we effectively _commit_ our changes by _promoting_ them on the Configuration screen:
