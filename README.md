@@ -236,6 +236,7 @@ Consult the documentation for the exact requirements, but I created a universal 
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/6-add-access-token.png)
 
 Copy the token - as once you move away from this screen it will no longer be accessible. We'll use this below in the variable API_ADMIN_ACCESS_TOKEN:
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/7-token-copied.png)
 
 ### Configure OpenShift Custom Resources
 Next we need to configure our Istio control plane and our product-page microservice (the entry point to our bookinfo app) to delegate API Management responsibilities to 3scale. To do that we use a tool _3scale-config-gen_ that's inside the 3scale-istio-adapter-xxxxxxx pod. It generates some custom resources we need to apply at the Istio control plane level as well at the API exposing microservice level.
