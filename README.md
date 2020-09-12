@@ -1,4 +1,6 @@
 # 3scale Istio Mixer Adapter
+The overlap between classic API Management and Service Mesh is an interesting one. On the face of it, they provide competing capabilities - i.e. control anfd visibility into API traffic. Some even go so far as to say Service Mesh will be the death of API Management. We take a different stance on this, i.e. they offer complementary capabilities. Broadly speaking API Management adds business value to API traffic flowing into the mesh - so called _north-south_ traffic. Service Mesh is great and network level control especially for service to service communication, so called _east-west_ communication. What offer and demo here is a bridge - between API Management and Service - allowing to usilise both simultaneously in a seamless manner on the same OpenShift infrastructure.
+
 
 ## In this demo we 
 - setup 3scale on OpenShift
@@ -212,10 +214,55 @@ and copy your API credential ( _User Key_ ) also known as _API Key_.
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/2-get-api-key.png)
 
 
-Now we change our API product enforcement type to _Istio_. Go to 
+Now we change our API product deployment type to _Istio_. Go to 
 ```
-Product: API -> Applications -> Listing ->  drill into Developer's App_
+Product: API -> Integration -> Settings ->  change Deployment to Istio -> click _Update Product_ at the bottom of page
 ```
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/4-promote.png)
+
+Now we effectively _commit_ our changes by _promoting_ them on the Configuration screen:
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/3-settings-istio.png)
+
+Later on, we'll need the _service id_ of this Istio configured API Product. Copy it from the address bar. Below we'll use it in the variable SERVICE_ID. 
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/4-service-id.png)
+
+The final thing we need to do is create an access token with which the service mesh communicates back to the 3scale manager. Go to:
+```
+Settings (gear icon to the top right) -> Personal -> Tokens ->  Add Access Token
+```
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/5-add-access-token.png)
+
+Consult the documentation for the exact requirements, but I created a universal access token with full access (not recommended for production, but fine for a demo):
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/6-add-access-token.png)
+
+Copy the token - as once you move away from this screen it will no longer be accessible. We'll use this below in the variable API_ADMIN_ACCESS_TOKEN:
+
+### Configure OpenShift Custom Resources
+Next we need to configure our Istio control plane and our product-page microservice (the entry point to our bookinfo app) to delegate API Management responsibilities to 3scale. To do that we use a tool _3scale-config-gen_ that's inside the 3scale-istio-adapter-xxxxxxx pod. It generates some custom resources we need to apply at the Istio control plane level as well at the API exposing microservice level.
+
+
+export API_ADMIN_ACCESS_TOKEN=[yours copied above]
+export SM_CP_NS=istio-system
+export SYSTEM_PROVIDER_URL=https://3scale-admin.apps.cluster-65cd.sandbox135.opentlc.com
+export HANDLER_NAME=threescale
+
+oc exec -n ${SM_CP_NS} $(oc get po -n ${SM_CP_NS} -o jsonpath='{.items[?(@.metadata.labels.app=="3scale-istio-adapter")].metadata.name}') -it -- ./3scale-config-gen --url ${SYSTEM_PROVIDER_URL} --name ${HANDLER_NAME} --token ${API_ADMIN_ACCESS_TOKEN} -n ${SM_CP_NS} > threescale-adapter-config.yaml
+
+oc apply -f ./threescale-adapter-config.yaml -n istio-system
+
+
+
+oc project bookinfo
+export HANDLER_NAME="threescale"
+export SERVICE_ID="2"
+export DEPLOYMENT="productpage-v1"
+patch="$(oc get deployment "${DEPLOYMENT}" --template='{"spec":{"template":{"metadata":{"labels":{ {{ range $k,$v := .spec.template.metadata.labels }}"{{ $k }}":"{{ $v }}",{{ end }}"service-mesh.3scale.net/service-id":"'"${SERVICE_ID}"'","service-mesh.3scale.net/credentials":"'"${HANDLER_NAME}"'"}}}}}' )"
+oc patch deployment "${DEPLOYMENT}" --patch ''"${patch}"''
+
+
+
+
+
 
 
 
@@ -236,6 +283,7 @@ export CREDENTIALS_NAME="threescale"
 export SERVICE_ID="2"
 export DEPLOYMENT="productpage-v1"
 patch="$(oc get deployment "${DEPLOYMENT}" --template='{"spec":{"template":{"metadata":{"labels":{ {{ range $k,$v := .spec.template.metadata.labels }}"{{ $k }}":"{{ $v }}",{{ end }}"service-mesh.3scale.net/service-id":"'"${SERVICE_ID}"'","service-mesh.3scale.net/credentials":"'"${CREDENTIALS_NAME}"'"}}}}}' )"
+
 oc patch deployment "${DEPLOYMENT}" --patch ''"${patch}"''
 
 
