@@ -218,10 +218,10 @@ Now we change our API product deployment type to _Istio_. Go to
 ```
 Product: API -> Integration -> Settings ->  change Deployment to Istio -> click _Update Product_ at the bottom of page
 ```
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/3-settings-istio.png)
+Now we effectively _commit_ our changes by _promoting_ them on the Configuration screen:
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/4-promote.png)
 
-Now we effectively _commit_ our changes by _promoting_ them on the Configuration screen:
-![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/3-settings-istio.png)
 
 Later on, we'll need the _service id_ of this Istio configured API Product. Copy it from the address bar. Below we'll use it in the variable SERVICE_ID. 
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/4-service-id.png)
