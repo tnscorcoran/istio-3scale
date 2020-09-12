@@ -244,7 +244,7 @@ Next we need to configure our Istio control plane and our product-page microserv
 ```
 export API_ADMIN_ACCESS_TOKEN=[yours copied above]
 export SM_CP_NS=istio-system
-export SYSTEM_PROVIDER_URL=https://3scale-admin.apps.cluster-65cd.sandbox135.opentlc.com
+export SYSTEM_PROVIDER_URL=[your 3scale Admin URL]
 export HANDLER_NAME=threescale
 oc exec -n ${SM_CP_NS} $(oc get po -n ${SM_CP_NS} -o jsonpath='{.items[?(@.metadata.labels.app=="3scale-istio-adapter")].metadata.name}') -it -- ./3scale-config-gen --url ${SYSTEM_PROVIDER_URL} --name ${HANDLER_NAME} --token ${API_ADMIN_ACCESS_TOKEN} -n ${SM_CP_NS} > threescale-adapter-config.yaml
 ```
@@ -269,6 +269,10 @@ Now curl or use Postman to hit the Product Page - the value _Product-Page-URL_ s
 You'll get an access Denied message. Now append the 3scale credential in the format 
 ```
 ?user_key=[API-Key saved above]
+```
+If we go back to 3scale and visit the Analtyics screen by navigating to the area below and hit our API a few times, we can see the hit count incrementing:
+```
+API -> Analytics -> Usage
 ```
 
 Congratulations you've applied API Mangement to our HTTP URL through the 3scale Istio Adapter.
