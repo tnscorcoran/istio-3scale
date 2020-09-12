@@ -193,7 +193,7 @@ Now, output the Gateway URL:
 export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
 echo $GATEWAY_URL
 ```
-Append the path */productpage* to this gateway URL to view our Product Page under Service Mesh control. Hit it in a browser:
+Append the path */productpage* to this gateway URL to view our Product Page under Service Mesh control. We'll refer to this below as *Product-Page-URL* below. Hit it in a browser:
 ![](https://raw.githubusercontent.com/tnscorcoran/OpenShift-servicemesh/master/images/4-product-page.png)
 
 
@@ -209,7 +209,7 @@ But in my case, using the default Product called _API_, I go to:
 ```
 Product: API -> Applications -> Listing ->  drill into Developer's App_
 ```
-and copy your API credential ( _User Key_ ) also known as _API Key_. 
+and copy your API credential ( _User Key_ ) also known as _API-Key_ and refered to that below. 
 
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/2-get-api-key.png)
 
@@ -239,71 +239,39 @@ Copy the token - as once you move away from this screen it will no longer be acc
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/7-token-copied.png)
 
 ### Configure OpenShift Custom Resources
-Next we need to configure our Istio control plane and our product-page microservice (the entry point to our bookinfo app) to delegate API Management responsibilities to 3scale. To do that we use a tool _3scale-config-gen_ that's inside the 3scale-istio-adapter-xxxxxxx pod. It generates some custom resources we need to apply at the Istio control plane level as well at the API exposing microservice level.
+Next we need to configure our Istio control plane and our product-page microservice (the entry point to our bookinfo app) to delegate API Management responsibilities to 3scale. To do that we use a tool _3scale-config-gen_ that's inside the 3scale-istio-adapter-xxxxxxx pod. It generates some custom resources we need to apply at the Istio control plane level as well at the API exposing microservice level. Substitute your values in and execute the following:
 
-
+```
 export API_ADMIN_ACCESS_TOKEN=[yours copied above]
 export SM_CP_NS=istio-system
 export SYSTEM_PROVIDER_URL=https://3scale-admin.apps.cluster-65cd.sandbox135.opentlc.com
 export HANDLER_NAME=threescale
-
 oc exec -n ${SM_CP_NS} $(oc get po -n ${SM_CP_NS} -o jsonpath='{.items[?(@.metadata.labels.app=="3scale-istio-adapter")].metadata.name}') -it -- ./3scale-config-gen --url ${SYSTEM_PROVIDER_URL} --name ${HANDLER_NAME} --token ${API_ADMIN_ACCESS_TOKEN} -n ${SM_CP_NS} > threescale-adapter-config.yaml
-
+```
+Now apply the 3 custom resources (rule, handler, instance) created and populated into the file _threescale-adapter-config.yaml_.
+```
 oc apply -f ./threescale-adapter-config.yaml -n istio-system
+```
 
-
-
+Next we need to patch the productpage deployment to get ti delete API authorisation and traffic report reporting to 3scale. Execute the following:
+```
 oc project bookinfo
 export HANDLER_NAME="threescale"
-export SERVICE_ID="2"
+export SERVICE_ID="[yours copied above]"
 export DEPLOYMENT="productpage-v1"
 patch="$(oc get deployment "${DEPLOYMENT}" --template='{"spec":{"template":{"metadata":{"labels":{ {{ range $k,$v := .spec.template.metadata.labels }}"{{ $k }}":"{{ $v }}",{{ end }}"service-mesh.3scale.net/service-id":"'"${SERVICE_ID}"'","service-mesh.3scale.net/credentials":"'"${HANDLER_NAME}"'"}}}}}' )"
 oc patch deployment "${DEPLOYMENT}" --patch ''"${patch}"''
+```
 
+Now curl or use Postman to hit the Product Page - the value _Product-Page-URL_ saved above
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/7-token-copied.png)
 
+You'll get an access Denied message. Now append the 3scale credential in the format 
+```
+?user_key=[API-Key saved above]
+```
 
-
-
-
-
-
-oc project istio-system
-export API_ADMIN_ACCESS_TOKEN=229cccd645b00e459db30993893374cc85c7b6eb7f082c5582202a81ebe8654b
-export SM_CP_NS=istio-system
-export SYSTEM_PROVIDER_URL=https://3scale-admin.apps.cluster-65cd.sandbox135.opentlc.com
-export HANDLER_NAME=threescale
-
-oc exec -n ${SM_CP_NS} $(oc get po -n ${SM_CP_NS} -o jsonpath='{.items[?(@.metadata.labels.app=="3scale-istio-adapter")].metadata.name}') -it -- ./3scale-config-gen --url ${SYSTEM_PROVIDER_URL} --name ${HANDLER_NAME} --token ${API_ADMIN_ACCESS_TOKEN} -n ${SM_CP_NS} > threescale-adapter-config.yaml
-
-
-oc apply -f /Users/tomcorcoran/work/learning/int/005-satya-3scale-mixer/3-mbo-3scale-istio/threescale-adapter-config.yaml  -n istio-system
-
-
-oc project bookinfo
-export CREDENTIALS_NAME="threescale"
-export SERVICE_ID="2"
-export DEPLOYMENT="productpage-v1"
-patch="$(oc get deployment "${DEPLOYMENT}" --template='{"spec":{"template":{"metadata":{"labels":{ {{ range $k,$v := .spec.template.metadata.labels }}"{{ $k }}":"{{ $v }}",{{ end }}"service-mesh.3scale.net/service-id":"'"${SERVICE_ID}"'","service-mesh.3scale.net/credentials":"'"${CREDENTIALS_NAME}"'"}}}}}' )"
-
-oc patch deployment "${DEPLOYMENT}" --patch ''"${patch}"''
-
-
-
-
-More options
-https://github.com/3scale/3scale-istio-adapter#generating-and-creating-configuration
-
-
-
-
-
-
-
-
-
-
-
-
+Congratulations you've applied API Mangement to our HTTP URL through the 3scale Istio Adapter.
 
 
 ## Conclusion
