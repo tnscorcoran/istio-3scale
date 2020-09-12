@@ -223,7 +223,7 @@ Now we effectively _commit_ our changes by _promoting_ them on the Configuration
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/4-promote.png)
 
 
-Later on, we'll need the _service id_ of this Istio configured API Product. Copy it from the address bar. Below we'll use it in the variable SERVICE_ID. 
+Later on, we'll need the _service id_ of this Istio configured API Product. Copy it from the address bar - in my case 2. Below we'll use it in the variable SERVICE_ID. 
 ![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/4-service-id.png)
 
 The final thing we need to do is create an access token with which the service mesh communicates back to the 3scale manager. Go to:
