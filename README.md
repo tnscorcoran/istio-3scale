@@ -264,7 +264,7 @@ oc patch deployment "${DEPLOYMENT}" --patch ''"${patch}"''
 ```
 
 Now curl or use Postman to hit the Product Page - the value _Product-Page-URL_ saved above
-![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/7-token-copied.png)
+![](https://github.com/tnscorcoran/istio-3scale/blob/master/images/8-postman.png)
 
 You'll get an access Denied message. Now append the 3scale credential in the format 
 ```
