@@ -253,7 +253,7 @@ Now apply the 3 custom resources (rule, handler, instance) created and populated
 oc apply -f ./threescale-adapter-config.yaml -n istio-system
 ```
 
-Next we need to patch the productpage deployment to get ti delete API authorisation and traffic report reporting to 3scale. Execute the following:
+Next we need to patch the productpage deployment to get to delegate API authorisation and traffic reporting to 3scale. Execute the following:
 ```
 oc project bookinfo
 export HANDLER_NAME="threescale"
